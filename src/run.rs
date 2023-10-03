@@ -1,14 +1,26 @@
 use std::process::Command;
 use std::env;
 
-pub fn launch_application(app_name: &str) -> Result<(), String> {
-    let result = Command::new(app_name).spawn();
+pub fn execute_command(command: &str, args: Vec<&str>) -> Result<(), String> {
+    let result = Command::new(command)
+        .args(args)
+        .spawn();
+
     match result {
         Ok(mut child) => {
-            // Wait for the application to finish executing
             let status = child.wait();
             match status {
-                Ok(_) => Ok(()),
+                Ok(exit_status) => {
+                    if exit_status.success() {
+                        Ok(())
+                    } else {
+                        Err(format!(
+                            "Command '{}' failed with exit code {}",
+                            command,
+                            exit_status.code().unwrap_or(1)
+                        ))
+                    }
+                }
                 Err(err) => Err(err.to_string()),
             }
         }
@@ -29,4 +41,9 @@ pub fn is_application(command: &str) -> bool {
     }
     
     false
+}
+
+pub fn sudo() -> Result<(), String> {
+    // BUILT-IN SUDO FUNCTIONALITY WITHOUT USER NEEDING SUDO ON THEIR SYSTEM
+    todo!(); // cancelled COMMAND, WILL DELETE FROM CODEBASE SOON
 }

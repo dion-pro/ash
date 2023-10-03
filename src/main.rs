@@ -4,7 +4,6 @@ use whoami::hostname;
 #[allow(unused_imports)]
 use std::process::Command;
 use std::io::{self, Write};
-use std::fs;
 mod dir;
 mod run;
 use run::{launch_application, is_application};
@@ -17,9 +16,9 @@ fn main() {
 
     print!("{}", WELCOME_MESSAGE);
     loop {
-        let current_dir_display = display_current_dir(&current_dir);
+        let current_dir_display = display_current_dir(&current_dir).to_string();
         let hostname = get_hostname().unwrap();
-        print!("{} {:?} $ ", hostname, current_dir_display);
+        print!(" {} {:?} $ ", hostname, current_dir_display);
         io::stdout().flush().expect("Failed to flush stdout");
 
         let mut user_input = String::new();
@@ -49,8 +48,8 @@ fn main() {
         } else if user_input.starts_with("pwd") {
             println!("{}", current_dir.display());
         }
-        else if user_input.starts_with("run ") {
-            let app_to_run = &user_input[4..].trim(); // Extract the application name
+        else if user_input.starts_with("") {
+            let app_to_run = &user_input[4..].trim();
         
             if is_application(app_to_run) {
                 if let Err(err) = launch_application(app_to_run) {
@@ -89,7 +88,7 @@ fn display_current_dir(current_dir: &std::path::PathBuf) -> String {
 }
 
 fn clear_screen() {
-    print!("{esc}[2J", esc = 27 as char);
+    std::process::Command::new("clear").status().unwrap();
 }
 
 fn get_hostname() -> std::result::Result<String, String> {
